@@ -1,8 +1,7 @@
 package helper
 
 import (
-	"time"
-
+	"github.com/ryhnfhrza/simple-task-manager/internal/types"
 	"github.com/ryhnfhrza/simple-task-manager/model/domain"
 	"github.com/ryhnfhrza/simple-task-manager/model/web"
 )
@@ -23,9 +22,9 @@ func ToUserLoginResponse(user domain.User, token string) web.UserLoginResponse {
 }
 
 func ToTaskResponse(task domain.Task) web.TaskResponse {
-	var dueDate *time.Time
+	var dueDate *types.CustomTime
 	if task.DueDate.Valid {
-		dueDate = &task.DueDate.Time
+		dueDate = &types.CustomTime{Time: task.DueDate.Time}
 	}
 
 	return web.TaskResponse{

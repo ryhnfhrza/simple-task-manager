@@ -52,7 +52,7 @@ func (service *taskServiceImpl) Create(ctx context.Context, req web.TaskCreateRe
 	}
 
 	if req.DueDate != nil {
-		task.DueDate = sql.NullTime{Time: *req.DueDate, Valid: true}
+		task.DueDate = sql.NullTime{Time: req.DueDate.Time, Valid: true}
 	} else {
 		task.DueDate = sql.NullTime{Valid: false}
 	}
@@ -81,9 +81,10 @@ func (service *taskServiceImpl) Update(ctx context.Context, req web.TaskUpdateRe
 	if req.Description != "" {
 		task.Description = req.Description
 	}
-	if req.DueDate != nil && !req.DueDate.IsZero() {
-		task.DueDate = sql.NullTime{Time: *req.DueDate, Valid: true}
+	if req.DueDate != nil && !req.DueDate.Time.IsZero() {
+		task.DueDate = sql.NullTime{Time: req.DueDate.Time, Valid: true}
 	}
+
 	if req.Completed != nil {
 		task.Completed = *req.Completed
 	}

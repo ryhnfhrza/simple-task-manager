@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Task Manager — Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      // Tailwind config (optional)
+      tailwind.config = { theme: { extend: {} } };
+    </script>
+    <link rel="icon" href="data:;base64,iVBORw0KGgo=" />
+  </head>
+
+  <body
+    class="bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 min-h-screen"
+  >
+    <div class="min-h-screen flex items-center justify-center px-4">
+      <div class="max-w-3xl w-full grid grid-cols-1 md:grid-cols-2 gap-8">
+        <!-- Left: Branding -->
+        <div class="p-8 bg-white dark:bg-slate-800 rounded-xl shadow">
+          <h1 class="text-2xl font-bold mb-2">Task Manager</h1>
+          <p class="text-slate-600 dark:text-slate-300">
+            Manage tasks fast. Login or register to get started.
+          </p>
+          <hr class="my-4 border-slate-200 dark:border-slate-700" />
+          <div>
+            <p class="text-sm text-slate-500 dark:text-slate-400">Features</p>
+            <ul
+              class="mt-2 list-disc list-inside space-y-1 text-slate-600 dark:text-slate-300"
+            >
+              <li>JWT Authentication</li>
+              <li>Filter by due date, completed, sort, pagination</li>
+              <li>Responsive & theme toggle</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Right: Auth forms -->
+        <div class="p-6 bg-white dark:bg-slate-800 rounded-xl shadow">
+          <div id="alerts"></div>
+
+          <!-- Tabs -->
+          <div class="flex mb-4">
+            <button
+              id="tab-login"
+              class="flex-1 py-2 px-3 rounded-l-lg bg-sky-600 text-white"
+            >
+              Login
+            </button>
+            <button
+              id="tab-register"
+              class="flex-1 py-2 px-3 rounded-r-lg bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-100"
+            >
+              Register
+            </button>
+          </div>
+
+          <!-- Login form -->
+          <form id="form-login" class="space-y-4">
+            <input
+              id="login-username"
+              required
+              placeholder="Username"
+              class="w-full px-4 py-2 rounded-md border dark:border-slate-700 bg-slate-50 dark:bg-slate-900"
+            />
+            <input
+              id="login-password"
+              type="password"
+              required
+              placeholder="Password"
+              class="w-full px-4 py-2 rounded-md border dark:border-slate-700 bg-slate-50 dark:bg-slate-900"
+            />
+            <div class="flex justify-end">
+              <button
+                type="submit"
+                class="px-4 py-2 bg-sky-600 text-white rounded-md"
+              >
+                Sign in
+              </button>
+            </div>
+          </form>
+
+          <!-- Register form -->
+          <form id="form-register" class="space-y-4 hidden">
+            <input
+              id="reg-username"
+              required
+              placeholder="Username"
+              class="w-full px-4 py-2 rounded-md border dark:border-slate-700 bg-slate-50 dark:bg-slate-900"
+            />
+            <input
+              id="reg-password"
+              type="password"
+              required
+              placeholder="Password"
+              class="w-full px-4 py-2 rounded-md border dark:border-slate-700 bg-slate-50 dark:bg-slate-900"
+            />
+            <div class="flex justify-end">
+              <button
+                type="submit"
+                class="px-4 py-2 bg-emerald-600 text-white rounded-md"
+              >
+                Register
+              </button>
+            </div>
+          </form>
+
+          <p class="mt-4 text-xs text-slate-500">
+            By using this demo you accept the API behavior in local development.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <script src="./js/util.js"></script>
+    <script src="./js/api.js"></script>
+    <script src="./js/auth.js"></script>
+
+    <script>
+      // Jika sudah login, langsung masuk ke dashboard tanpa form
+      document.addEventListener("DOMContentLoaded", () => {
+        const token = localStorage.getItem("tm_token");
+        if (token) {
+          location.replace("./dashboard.html");
+          return;
+        }
+      });
+
+      // Tabs logic
+      const loginTab = document.getElementById("tab-login");
+      const regTab = document.getElementById("tab-register");
+      const formLogin = document.getElementById("form-login");
+      const formReg = document.getElementById("form-register");
+      const alerts = document.getElementById("alerts");
+
+      loginTab.onclick = () => {
+        formLogin.classList.remove("hidden");
+        formReg.classList.add("hidden");
+        loginTab.classList.add("bg-sky-600", "text-white");
+        regTab.classList.remove("bg-sky-600", "text-white");
+      };
+      regTab.onclick = () => {
+        formReg.classList.remove("hidden");
+        formLogin.classList.add("hidden");
+        regTab.classList.add("bg-sky-600", "text-white");
+        loginTab.classList.remove("bg-sky-600", "text-white");
+      };
+
+      // Login form
+      formLogin.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const username = document.getElementById("login-username").value.trim();
+        const password = document.getElementById("login-password").value.trim();
+        try {
+          const res = await apiLogin({ username, password });
+          const token =
+            res?.data?.token || res?.data?.access_token || res?.data;
+          if (!token) throw new Error("Missing token in response");
+
+          // simpan token ke localStorage
+          authSaveToken(token);
+
+          // kasih notifikasi lalu redirect
+          showAlert("Login success, redirecting...", "success");
+
+          // beri waktu sedikit supaya storage selesai disimpan
+          setTimeout(() => {
+            window.location.replace("./dashboard.html");
+          }, 500);
+        } catch (err) {
+          showAlert(err.message || "Login gagal", "error");
+        }
+      });
+
+      // Register form
+      formReg.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const username = document.getElementById("reg-username").value.trim();
+        const password = document.getElementById("reg-password").value.trim();
+        try {
+          await apiRegister({ username, password });
+          showAlert("Registered successfully! Please login.", "success");
+          loginTab.click();
+          document.getElementById("login-username").focus();
+        } catch (err) {
+          showAlert(err.message || "Registration failed", "error");
+        }
+      });
+
+      // small alert util
+      function showAlert(rawMsg, type = "info") {
+        let msg = "";
+
+        // --- 1️⃣ Ambil pesan utama (kalau JSON)
+        try {
+          if (typeof rawMsg === "string" && rawMsg.startsWith("{")) {
+            const parsed = JSON.parse(rawMsg);
+            msg =
+              parsed.error ||
+              parsed.message ||
+              parsed.data?.message ||
+              Object.values(parsed).flat().join(", ");
+          } else if (typeof rawMsg === "object") {
+            msg =
+              rawMsg.error ||
+              rawMsg.message ||
+              rawMsg.data?.message ||
+              JSON.stringify(rawMsg);
+          } else {
+            msg = rawMsg;
+          }
+        } catch {
+          msg = rawMsg;
+        }
+
+        // --- 2️⃣ Kalau pesan masih mentah dari Go validator
+        if (msg && msg.includes("Key:") && msg.includes("Error:")) {
+          // handle newline, spasi, tab
+          const cleaned = msg.replace(/\r?\n|\r/g, " "); // hapus newline
+          const parts = cleaned
+            .split(/Key:\s*/g)
+            .map((x) => x.trim())
+            .filter(Boolean);
+
+          const readable = parts.map((p) => {
+            // Contoh input: "TaskCreateRequest.Title' Error:Field validation for 'Title' failed on the 'required_without' tag"
+            const fieldMatch = p.match(/'(?:Task\w+Request\.)?(\w+)'/);
+            const tagMatch = p.match(/'(\w+)' tag/);
+
+            let field = fieldMatch ? fieldMatch[1] : "Field";
+            const tag = tagMatch ? tagMatch[1] : "";
+
+            // Buat nama field jadi rapi
+            field = field.charAt(0).toUpperCase() + field.slice(1);
+
+            // mapping ke pesan manusiawi
+            switch (tag) {
+              case "required":
+                return `${field} wajib diisi.`;
+              case "required_without":
+                return `${field} kolom title atau description wajib diisi salah satunya.`;
+              case "min":
+                return `${field} terlalu pendek.`;
+              case "max":
+                return `${field} terlalu panjang.`;
+              case "email":
+                return `${field} harus berupa alamat email yang valid.`;
+              case "passComplex":
+                return `${field} harus mengandung huruf besar, huruf kecil, angka.`;
+              case "alphanum":
+                return `${field} hanya boleh berisi huruf dan angka.`;
+              case "lte":
+                return `${field} harus lebih kecil atau sama dengan nilai yang diizinkan.`;
+              case "gte":
+                return `${field} harus lebih besar atau sama dengan nilai yang diizinkan.`;
+              default:
+                // kalau tag tidak ketemu, coba ambil potongan setelah "Error:"
+                const custom = p.match(/Error:\s*(.*)$/);
+                if (custom && custom[1]) {
+                  return `${field}: ${custom[1]
+                    .replace(
+                      /Field validation for.*failed on the.*/,
+                      "tidak valid."
+                    )
+                    .trim()}`;
+                }
+                return `${field} tidak valid.`;
+            }
+          });
+
+          msg = readable.join("<br>");
+        }
+
+        // --- 3️⃣ Fallback
+        if (!msg || msg === "{}" || msg === "null")
+          msg = "Terjadi kesalahan tak terduga.";
+
+        // --- 4️⃣ Tampilkan ke UI
+        alerts.innerHTML = `
+    <div class="p-3 rounded-md ${
+      type === "error"
+        ? "bg-red-100 text-red-700 border border-red-300"
+        : type === "success"
+        ? "bg-emerald-100 text-emerald-700 border border-emerald-300"
+        : "bg-sky-100 text-sky-700 border border-sky-300"
+    } shadow-sm transition-all duration-300 leading-relaxed">
+      ${msg}
+    </div>
+  `;
+
+        setTimeout(() => (alerts.innerHTML = ""), 5000);
+      }
+    </script>
+  </body>
+</html>
