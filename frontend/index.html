@@ -6,7 +6,7 @@
     <title>Task Manager — Login</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-      // Tailwind config (optional)
+      // Tailwind config
       tailwind.config = { theme: { extend: {} } };
     </script>
     <link rel="icon" href="data:;base64,iVBORw0KGgo=" />
@@ -118,7 +118,6 @@
     <script src="./js/auth.js"></script>
 
     <script>
-      // Jika sudah login, langsung masuk ke dashboard tanpa form
       document.addEventListener("DOMContentLoaded", () => {
         const token = localStorage.getItem("tm_token");
         if (token) {
@@ -158,13 +157,10 @@
             res?.data?.token || res?.data?.access_token || res?.data;
           if (!token) throw new Error("Missing token in response");
 
-          // simpan token ke localStorage
           authSaveToken(token);
 
-          // kasih notifikasi lalu redirect
           showAlert("Login success, redirecting...", "success");
 
-          // beri waktu sedikit supaya storage selesai disimpan
           setTimeout(() => {
             window.location.replace("./dashboard.html");
           }, 500);
@@ -192,7 +188,6 @@
       function showAlert(rawMsg, type = "info") {
         let msg = "";
 
-        // --- 1️⃣ Ambil pesan utama (kalau JSON)
         try {
           if (typeof rawMsg === "string" && rawMsg.startsWith("{")) {
             const parsed = JSON.parse(rawMsg);
@@ -214,27 +209,22 @@
           msg = rawMsg;
         }
 
-        // --- 2️⃣ Kalau pesan masih mentah dari Go validator
         if (msg && msg.includes("Key:") && msg.includes("Error:")) {
-          // handle newline, spasi, tab
-          const cleaned = msg.replace(/\r?\n|\r/g, " "); // hapus newline
+          const cleaned = msg.replace(/\r?\n|\r/g, " ");
           const parts = cleaned
             .split(/Key:\s*/g)
             .map((x) => x.trim())
             .filter(Boolean);
 
           const readable = parts.map((p) => {
-            // Contoh input: "TaskCreateRequest.Title' Error:Field validation for 'Title' failed on the 'required_without' tag"
             const fieldMatch = p.match(/'(?:Task\w+Request\.)?(\w+)'/);
             const tagMatch = p.match(/'(\w+)' tag/);
 
             let field = fieldMatch ? fieldMatch[1] : "Field";
             const tag = tagMatch ? tagMatch[1] : "";
 
-            // Buat nama field jadi rapi
             field = field.charAt(0).toUpperCase() + field.slice(1);
 
-            // mapping ke pesan manusiawi
             switch (tag) {
               case "required":
                 return `${field} wajib diisi.`;
@@ -255,7 +245,6 @@
               case "gte":
                 return `${field} harus lebih besar atau sama dengan nilai yang diizinkan.`;
               default:
-                // kalau tag tidak ketemu, coba ambil potongan setelah "Error:"
                 const custom = p.match(/Error:\s*(.*)$/);
                 if (custom && custom[1]) {
                   return `${field}: ${custom[1]
@@ -272,11 +261,9 @@
           msg = readable.join("<br>");
         }
 
-        // --- 3️⃣ Fallback
         if (!msg || msg === "{}" || msg === "null")
           msg = "Terjadi kesalahan tak terduga.";
 
-        // --- 4️⃣ Tampilkan ke UI
         alerts.innerHTML = `
     <div class="p-3 rounded-md ${
       type === "error"

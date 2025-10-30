@@ -1,10 +1,7 @@
-// parse flexible date (YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS or full RFC)
 function parseFlexible(dateStr) {
   if (!dateStr) return null
-  // try ISO parse first
   let d = new Date(dateStr)
   if (!isNaN(d)) return d
-  // try add time as midnight
   const reDate = /^(\d{4}-\d{2}-\d{2})$/
   const m = dateStr.match(reDate)
   if (m) return new Date(m[1] + 'T00:00:00')

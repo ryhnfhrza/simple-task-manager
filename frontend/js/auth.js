@@ -7,7 +7,6 @@ function authIsLogged() { return !!authGetToken() }
 
 // redirect to login if not logged
 document.addEventListener('DOMContentLoaded', () => {
-  // If on dashboard and not logged, go back to index
   if (location.pathname.endsWith('dashboard.html') && !authIsLogged()) {
     location.href = './index.html'
   }

@@ -1,5 +1,3 @@
-// js/tasks.js
-// tasks page logic
 let currentPage = 0
 let pageLimit = 20
 
@@ -61,7 +59,6 @@ function toast(rawMsg, type = 'info') {
         }
       });
 
-      // kalau ada kombinasi required_without Title dan Description
       if (requiredWithoutFields.length >= 2) {
         messages.unshift(`Harus diisi salah satu antara ${requiredWithoutFields.join(' dan ')}.`);
       } else if (requiredWithoutFields.length === 1) {
@@ -74,7 +71,6 @@ function toast(rawMsg, type = 'info') {
     msg = rawMsg;
   }
 
-  // tampilkan toast
   el.id = id;
   el.className =
     'p-3 rounded-md mb-2 ' +
@@ -92,11 +88,9 @@ function toast(rawMsg, type = 'info') {
 
 async function loadUserInfo() {
   const el = document.getElementById('user-info')
-  // If you want more user info, call dedicated endpoint and show username
   el.textContent = 'You'
 }
 
-// build query string from controls
 function buildQuery() {
   const dueBefore = document.getElementById('filter-due-before').value.trim();
   const dueAfter = document.getElementById('filter-due-after').value.trim();
@@ -109,7 +103,6 @@ function buildQuery() {
 
   const params = new URLSearchParams();
 
-  // Tambahkan validasi format tanggal
   const dateRegex = /^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}(:\d{2})?)?$/;
 
   if (completed !== '') params.append('completed', completed);
@@ -140,7 +133,6 @@ async function fetchAndRender() {
   } catch (e) {
     toast(e.message, 'error')
     if (e.message.toLowerCase().includes('unauthorized')) {
-      // clear token and force back to login
       authClear()
       location.href = './index.html'
     }
@@ -227,7 +219,6 @@ function renderTasks(tasks) {
   });
 
 
-  // attach events
   document.querySelectorAll('.btn-delete').forEach(btn => {
     btn.onclick = async (e) => {
       const id = btn.getAttribute('data-id')
@@ -254,9 +245,8 @@ function renderTasks(tasks) {
   document.querySelectorAll('.toggle-complete').forEach(cb => {
     cb.onchange = async () => {
       const id = cb.getAttribute('data-id');
-      const card = cb.closest('.task-card'); // ambil card-nya
+      const card = cb.closest('.task-card');
       try {
-        // animasi perubahan status (fade)
         card.style.opacity = "0.5";
         await apiUpdateTask({ id: parseInt(id), completed: cb.checked ? 1 : 0 });
         card.style.opacity = "1";
@@ -279,7 +269,6 @@ function openModal(title, task = null) {
   document.getElementById('modal-title').innerText = title
   document.getElementById('task-title').value = task?.title || ''
   document.getElementById('task-desc').value = task?.description || ''
-  // set input type datetime-local value (without timezone)
   document.getElementById('task-due').value = task?.due_date ? new Date(task.due_date).toISOString().slice(0, 19) : ''
   editingId = task?.id || null
   modal.classList.remove('hidden')
@@ -299,8 +288,7 @@ formTask.addEventListener('submit', async (e) => {
     const description = document.getElementById('task-desc').value.trim()
     const due = document.getElementById('task-due').value.trim()
     const payload = { title, description }
-    if (due) payload.due_date = due // server parse flexible
-
+    if (due) payload.due_date = due
     if (editingId) {
       payload.id = editingId
       await apiUpdateTask(payload)
@@ -326,7 +314,6 @@ document.getElementById('btn-refresh').onclick = () => { currentPage = 0; fetchA
 document.getElementById('prev-page').onclick = () => { if (currentPage > 0) { currentPage--; fetchAndRender() } }
 document.getElementById('next-page').onclick = () => { currentPage++; fetchAndRender() }
 
-// attach auto-fetch on filter change (immediate feedback - no need to press refresh)
 // helper debounce
 function debounce(fn, delay = 700) {
   let timer;
@@ -336,7 +323,6 @@ function debounce(fn, delay = 700) {
   };
 }
 
-// attach auto-fetch on filter change (immediate feedback - no need to press refresh)
 function attachFilterListeners() {
   const ids = [
     'filter-due-before',
@@ -357,7 +343,6 @@ function attachFilterListeners() {
     if (!el) return;
 
     if (el.tagName.toLowerCase() === 'input') {
-      // hanya fetch setelah user berhenti mengetik 700ms
       el.addEventListener('input', debouncedFetch);
     } else {
       el.addEventListener('change', debouncedFetch);
@@ -373,7 +358,6 @@ document.addEventListener('DOMContentLoaded', () => {
   loadUserInfo()
   document.getElementById('btn-logout').onclick = () => logoutAndBack()
   attachFilterListeners()
-  // initial fetch
   fetchAndRender()
 })
 // helper
