@@ -4,11 +4,11 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 
 	"github.com/go-playground/validator/v10"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/joho/godotenv"
-
 	"github.com/ryhnfhrza/simple-task-manager/app"
 	"github.com/ryhnfhrza/simple-task-manager/controller"
 	"github.com/ryhnfhrza/simple-task-manager/exception"
@@ -20,8 +20,15 @@ import (
 
 func main() {
 
-	err := godotenv.Load()
-	helper.PanicIfError(err)
+	envPath := filepath.Join("..", ".env")
+
+	if p := os.Getenv("CONFIG_PATH"); p != "" {
+		envPath = p
+	}
+
+	if err := godotenv.Load(envPath); err != nil {
+		log.Printf("Warning: gagal memuat %s: %v", envPath, err)
+	}
 
 	port := os.Getenv("APP_PORT")
 	if port == "" {
@@ -51,7 +58,7 @@ func main() {
 	}
 
 	log.Printf("Server running on port %s", port)
-	err = server.ListenAndServe()
+	err := server.ListenAndServe()
 	helper.PanicIfError(err)
 
 }

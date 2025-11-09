@@ -120,6 +120,7 @@
       </div>
     </div>
 
+    <script src="./js/config.js"></script>
     <script src="./js/util.js"></script>
     <script src="./js/api.js"></script>
     <script src="./js/auth.js"></script>
@@ -244,7 +245,7 @@
               case "email":
                 return `${field} harus berupa alamat email yang valid.`;
               case "passComplex":
-                return `${field} harus mengandung huruf besar, huruf kecil, angka.`;
+                return `${field} harus min 8 character dan mengandung huruf besar, huruf kecil, angka.`;
               case "alphanum":
                 return `${field} hanya boleh berisi huruf dan angka.`;
               case "lte":

@@ -103,17 +103,9 @@ function buildQuery() {
 
   const params = new URLSearchParams();
 
-  const dateRegex = /^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}(:\d{2})?)?$/;
-
   if (completed !== '') params.append('completed', completed);
-
-  if (dueBefore && dateRegex.test(dueBefore)) {
-    params.append('due_before', dueBefore);
-  }
-  if (dueAfter && dateRegex.test(dueAfter)) {
-    params.append('due_after', dueAfter);
-  }
-
+  if (dueBefore) params.append('due_before', dueBefore);
+  if (dueAfter) params.append('due_after', dueAfter);
   if (sortBy) params.append('sort_by', sortBy);
   if (order) params.append('order', order);
   if (limit) params.append('limit', limit);

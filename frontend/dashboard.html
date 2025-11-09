@@ -30,21 +30,29 @@
       <main class="flex-1 p-4">
         <div class="max-w-6xl mx-auto">
           <!-- Controls -->
-          <div class="mb-4 grid md:grid-cols-3 gap-3">
-            <div class="flex gap-2">
-              <input
-                id="filter-due-after"
-                type="text"
-                placeholder="Due after (YYYY-MM-DD)"
-                class="px-3 py-2 rounded-md border border-slate-700 bg-slate-800 w-full text-slate-100"
-              />
-              <input
-                id="filter-due-before"
-                type="text"
-                placeholder="Due before (YYYY-MM-DD)"
-                class="px-3 py-2 rounded-md border border-slate-700 bg-slate-800 w-full text-slate-100"
-              />
-            </div>
+          <div class="flex gap-2 w-full">
+          <div class="flex flex-col w-full">
+            <label for="filter-due-after" class="text-sm text-slate-300 mb-1">
+              Due After
+            </label>
+            <input
+              id="filter-due-after"
+              type="date"
+              class="px-3 py-2 rounded-md border border-slate-700 bg-slate-800 text-slate-100"
+            />
+          </div>
+
+          <div class="flex flex-col w-full">
+            <label for="filter-due-before" class="text-sm text-slate-300 mb-1">
+              Due Before
+            </label>
+            <input
+              id="filter-due-before"
+              type="date"
+              class="px-3 py-2 rounded-md border border-slate-700 bg-slate-800 text-slate-100"
+            />
+          </div>
+        </div>
 
             <div class="flex gap-2 items-center">
               <select
@@ -236,6 +244,7 @@
       });
     </script>
 
+    <script src="./js/config.js"></script>
     <script src="./js/util.js"></script>
     <script src="./js/api.js"></script>
     <script src="./js/auth.js"></script>
